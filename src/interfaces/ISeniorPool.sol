@@ -5,10 +5,10 @@ pragma solidity ^0.8.19;
 import {ReignConfig} from "../protocol/ReignConfig.sol";
 /**
  * @title Opportunity Pool Interface
- * @author 
+ * @author
  * @notice This contract is used to define the interface for the Senior Pool
  */
- */
+
 interface ISeniorPool {
     function withdrawFromOpportunity(bool _isWriteOff, bytes32 _opportunityId, uint256 _amount) external;
 }
