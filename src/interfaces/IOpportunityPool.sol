@@ -1,0 +1,59 @@
+//SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.19;
+
+import {ReignConfig} from "../protocol/ReignConfig.sol";
+
+interface IOpportunityPool {
+    enum SubPoolType {
+        Senior,
+        Junior
+    }
+
+    struct SubPoolDetails {
+        uint256 subPoolId;
+        uint256 totalDepositable;
+        bool isPoolLocked;
+        uint256 fundsLockedTill;
+        uint256 yieldGenerated;
+        uint256 overdueGenerated;
+    }
+
+    function isStaking(address _investor) external view returns (bool);
+
+    function initialize(
+        ReignConfig _reignConfig,
+        bytes32 _opportunityId,
+        uint256 _loanAmount,
+        uint256 _loanTermInDays,
+        uint256 _loanInterest,
+        uint256 _paymentIntervalInDays,
+        uint8 _loanType
+    ) external;
+
+    function deposit(uint8 _subPoolId, uint256 _amount) external;
+
+    function drawdown() external;
+
+    function repayment() external;
+
+    function withdrawAll(uint8) external returns (uint256);
+
+    function getUserWithdrawableAmount() external view returns (uint256);
+
+    function getRepaymentAmount() external view returns (uint256);
+
+    function getOverDuePercentage() external view returns (uint256, uint256);
+
+    function nextPaymentDue() external view returns (uint256);
+
+    function getSeniorPoolTotalDepositable() external view returns (uint256);
+
+    function getSeniorProfit() external view returns (uint256);
+
+    function getOpportunityName() external view returns (string memory);
+
+    function writeOffOpportunity() external;
+
+    function getSeniorPoolWithdrawableAmount() external view returns (uint256);
+}

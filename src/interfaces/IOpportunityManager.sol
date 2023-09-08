@@ -12,7 +12,7 @@ interface IOpportunityManager {
         Active,
         Rejected,
         Collateralized,
-        Disbursed,
+        DrawnDown,
         Repaid,
         UnderReview,
         WriteOff,
@@ -67,9 +67,9 @@ interface IOpportunityManager {
 
     function voteOnOpportunity(bytes32 _opportunityId, uint8 _status) external;
 
-    function markDisbursed(bytes32 _opportunityId) external;
+    function markDrawnDown(bytes32 _opportunityId) external;
 
-    function isDisbursed(bytes32 _opportunityId) external view returns (bool);
+    function isDrawndown(bytes32 _opportunityId) external view returns (bool);
 
     function markRepaid(bytes32 _opportunityId) external;
 
