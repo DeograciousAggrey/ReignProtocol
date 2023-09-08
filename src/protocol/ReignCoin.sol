@@ -35,12 +35,30 @@ contract ReignCoin is Initializable, AccessControlUpgradeable, ERC20Upgradeable,
     ///////////////////
     error ReignCoin__InvalidStakingAddress();
 
-    uint256 public override totalSupply;
+    uint256 public override totalShares;
 
     function initialize(address _reignProtocol) external override initializer {
         if (_reignProtocol != address(0)) {
             revert ReignCoin__InvalidStakingAddress();
         }
         __ERC20_init("Reign", "REIGN");
+        _setupRole(Constants.getOwnerRole(), _reignProtocol);
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function decimals() public view virtual override returns (uint8) {
+        return 6;
+    }
+
+    function mint(address _to, uint256 _amount) public override {
+        require(hasRole(Constants.getOwnerRole(), msg.sender), "Caller is not an owner");
+        totalShares += _amount;
+        _mint(_to, _amount);
+    }
+
+    function burn(address _from, uint256 _amount) public override {
+        require(hasRole(Constants.getOwnerRole(), msg.sender), "Caller is not an owner");
+        totalShares -= _amount;
+        _burn(_from, _amount);
     }
 }
