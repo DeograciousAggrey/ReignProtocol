@@ -3,6 +3,11 @@
 pragma solidity ^0.8.19;
 
 import {ReignConfig} from "../protocol/ReignConfig.sol";
+/**
+ * @title Opportunity Pool Interface
+ * @author
+ * @notice this contract is used to define the interface for the Opportunity Pool
+ */
 
 interface IOpportunityPool {
     enum SubPoolType {

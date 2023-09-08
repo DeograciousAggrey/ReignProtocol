@@ -2,4 +2,8 @@
 
 pragma solidity ^0.8.19;
 
-interface ISeniorPool {}
+import {ReignConfig} from "../protocol/ReignConfig.sol";
+
+interface ISeniorPool {
+    function withdrawFromOpportunity(bool _isWriteOff, bytes32 _opportunityId, uint256 _amount) external;
+}
