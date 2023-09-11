@@ -69,9 +69,9 @@ contract CollateralToken is
         _setTokenURI(tokenId, uri);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override whenNotPaused {
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
+    // function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal override whenNotPaused {
+    //     super._beforeTokenTransfer(from, to, tokenId);
+    // }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(Constants.upgraderRole()) {}
 
