@@ -2,4 +2,8 @@
 
 pragma solidity ^0.8.19;
 
-contract ReignConfig {}
+contract ReignConfig {
+    function getAddresses(uint256 _index) external view returns (address) {}
+
+    function getNumber(uint256 _index) external view returns (uint256) {}
+}
