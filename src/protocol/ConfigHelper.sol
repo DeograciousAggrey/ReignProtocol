@@ -3,7 +3,7 @@
 pragma solidity 0.8.4;
 
 import {ReignConfig} from "./ReignConfig.sol";
-import "./ConfigOptions.sol";
+import {ConfigOptions} from "./ConfigOptions.sol";
 
 /**
  * @title ConfigHelper
@@ -13,7 +13,7 @@ import "./ConfigOptions.sol";
  */
 
 library ConfigHelper {
-    function dygnifyAdminAddress(ReignConfig config) internal view returns (address) {
+    function reignAdminAddress(ReignConfig config) internal view returns (address) {
         return config.getAddress(uint256(ConfigOptions.Addresses.ReignAdmin));
     }
 
@@ -65,11 +65,11 @@ library ConfigHelper {
         return config.getAddress(uint256(ConfigOptions.Addresses.InvestorContract));
     }
 
-    function dygnifyTreasuryAddress(ReignConfig config) internal view returns (address) {
+    function reignTreasuryAddress(ReignConfig config) internal view returns (address) {
         return config.getAddress(uint256(ConfigOptions.Addresses.ReignTreasury));
     }
 
-    function dygnifyKeeperAddress(ReignConfig config) internal view returns (address) {
+    function reignKeeperAddress(ReignConfig config) internal view returns (address) {
         return config.getAddress(uint256(ConfigOptions.Addresses.ReignKeeper));
     }
 
