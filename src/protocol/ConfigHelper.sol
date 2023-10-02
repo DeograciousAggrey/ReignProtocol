@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity 0.8.4;
 
-import "./ReignConfig.sol";
+import {ReignConfig} from "./ReignConfig.sol";
 import "./ConfigOptions.sol";
 
 /**

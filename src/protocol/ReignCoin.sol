@@ -21,7 +21,7 @@
 // private
 // view & pure functions
 
-pragma solidity ^0.8.19;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
