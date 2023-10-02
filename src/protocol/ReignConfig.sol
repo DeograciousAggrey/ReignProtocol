@@ -2,8 +2,7 @@
 
 pragma solidity 0.8.4;
 
-contract ReignConfig {
-    function getAddresses(uint256 _index) external view returns (address) {}
+import {BaseUpgradeablePausable} from "./BaseUpgradeablePausable.sol";
+import {ConfigHelper} from "./ConfigHelper.sol";
 
-    function getNumber(uint256 _index) external view returns (uint256) {}
-}
+contract ReignConfig is BaseUpgradeablePausable {}
