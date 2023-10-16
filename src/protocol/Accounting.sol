@@ -61,4 +61,28 @@ library Accounting {
         uint256 emiAmountInRay = DSMath.rmul(loanAmountInRay, interestForRepaymentDays);
         return emiAmountInRay.div(10 ** 21);
     }
+
+    /**
+     *
+     * Term Loan Interest Calculation
+     */
+    function getTermLoanInterest(uint256 outstandingPrinciple, uint256 numberOfDays, uint256 loanInterest)
+        internal
+        pure
+        returns (uint256)
+    {
+        require(outstandingPrinciple > 0 && numberOfDays > 0 && loanInterest > 0, "Invalid Input");
+
+        //Daily Interest
+        uint256 interestPerDay = DSMath.rdiv(
+            DSMath.rdiv(DSMath.getInRay(loanInterest, currentDecimals), (Constants.oneYearInDays() * DSMath.RAY)),
+            (100 * DSMath.RAY)
+        );
+
+        //Interest for repayment
+        uint256 totalInterest = DSMath.rmul(interestPerDay, (numberOfDays * DSMath.RAY));
+        uint256 outstandingPrincipleInRay = DSMath.getInRay(outstandingPrinciple, currentDecimals);
+        uint256 interest = DSMath.rmul(outstandingPrincipleInRay, totalInterest);
+        return interest.div(10 ** 21);
+    }
 }
