@@ -21,8 +21,8 @@ library ConfigHelper {
         return config.getAddress(uint256(ConfigOptions.Addresses.USDCToken));
     }
 
-    function lpTokenAddress(ReignConfig config) internal view returns (address) {
-        return config.getAddress(uint256(ConfigOptions.Addresses.LPToken));
+    function reignCoinAddress(ReignConfig config) internal view returns (address) {
+        return config.getAddress(uint256(ConfigOptions.Addresses.ReignCoin));
     }
 
     function seniorPoolAddress(ReignConfig config) internal view returns (address) {
@@ -50,7 +50,7 @@ library ConfigHelper {
     }
 
     function getOpportunityOrigination(ReignConfig config) internal view returns (address) {
-        return config.getAddress(uint256(ConfigOptions.Addresses.OpportunityOrigination));
+        return config.getAddress(uint256(ConfigOptions.Addresses.OpportunityManager));
     }
 
     function getReignFee(ReignConfig config) internal view returns (uint256) {
