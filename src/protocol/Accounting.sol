@@ -85,4 +85,61 @@ library Accounting {
         uint256 interest = DSMath.rmul(outstandingPrincipleInRay, totalInterest);
         return interest.div(10 ** 21);
     }
+
+    /**
+     *
+     *
+     *
+     * Get Yield Percentage
+     *
+     *
+     */
+    function getYieldPercentage(
+        uint256 reignFees,
+        uint256 underwriterFees,
+        bool isTermLoan,
+        uint256 emiAmount,
+        uint256 loanAmount,
+        uint256 totalRepayments,
+        uint256 loanInterest,
+        uint256 leverageRatio,
+        uint256 loanTenureInDays
+    ) internal pure returns (uint256, uint256) {
+        require(
+            reignFees > 0 && underwriterFees > 0 && emiAmount > 0 && loanAmount > 0 && totalRepayments > 0
+                && loanInterest > 0 && leverageRatio > 0 && loanTenureInDays > 0,
+            "Invalid Input"
+        );
+        uint256 totalInterestInRay;
+        uint256 reignFeesInRay = DSMath.getInRay(reignFees, currentDecimals);
+        uint256 underwriterFeesInRay = DSMath.getInRay(underwriterFees, currentDecimals);
+        if (isTermLoan) {
+            uint256 emiAmountInRay = DSMath.getInRay(emiAmount, Accounting.currentDecimals);
+            uint256 totalREpaymentsInRay = totalRepayments * DSMath.RAY;
+            uint256 loanAmountInRay = DSMath.getInRay(loanAmount, Accounting.currentDecimals);
+            uint256 interestInRay = DSMath.sub(DSMath.rmul(emiAmountInRay, totalREpaymentsInRay), loanAmountInRay);
+            totalInterestInRay = DSMath.rdiv(interestInRay, loanAmountInRay);
+        } else {
+            //Get Daily interest
+            uint256 interestPerDay = DSMath.rdiv(
+                DSMath.rdiv(DSMath.getInRay(loanInterest, currentDecimals), (Constants.oneYearInDays() * DSMath.RAY)),
+                (100 * DSMath.RAY)
+            );
+            //Get Interest for repayment
+            totalInterestInRay = DSMath.rmul(interestPerDay, (loanTenureInDays * DSMath.RAY));
+        }
+
+        require(totalInterestInRay > 0, "Invalid Interest");
+        uint256 _seniorYieldPercentage =
+            DSMath.rmul(totalInterestInRay, DSMath.sub(DSMath.sub(DSMath.RAY, reignFeesInRay), underwriterFeesInRay));
+
+        uint256 _juniorYieldPercentage = DSMath.rmul(
+            totalInterestInRay,
+            DSMath.add(
+                DSMath.sub(DSMath.RAY, reignFeesInRay), DSMath.rmul(underwriterFeesInRay, leverageRatio * DSMath.RAY)
+            )
+        );
+
+        return (_seniorYieldPercentage.div(10 ** 21), _juniorYieldPercentage.div(10 ** 21));
+    }
 }
