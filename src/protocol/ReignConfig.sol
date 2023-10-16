@@ -14,7 +14,7 @@ contract ReignConfig is BaseUpgradeablePausable {
 
     function initialize() public initializer {
         require(msg.sender != address(0), "Invalid Sender Address");
-        __BaseUpgradeablePausable_init(msg.sender);
+        _BaseUpgradeablePausable_init(msg.sender);
         setAddress(0, msg.sender);
     }
 
