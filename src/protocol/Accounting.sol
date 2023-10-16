@@ -142,4 +142,53 @@ library Accounting {
 
         return (_seniorYieldPercentage.div(10 ** 21), _juniorYieldPercentage.div(10 ** 21));
     }
+
+    /**
+     *
+     *
+     *
+     * Get Interest Distribution
+     *
+     *
+     */
+    function getInterestDistribution(
+        uint256 reignFees,
+        uint256 underwriterFees,
+        uint256 interestAmount,
+        uint256 leverageRatio,
+        uint256 loanAmount,
+        uint256 seniorPoolInvestment
+    ) internal pure returns (uint256, uint256) {
+        require(
+            reignFees > 0 && underwriterFees > 0 && interestAmount > 0 && leverageRatio > 0 && loanAmount > 0
+                && seniorPoolInvestment > 0,
+            "Invalid Input"
+        );
+        uint256 reignFeesInRay = DSMath.getInRay(reignFees, currentDecimals);
+        uint256 underwriterFeesInRay = DSMath.getInRay(underwriterFees, currentDecimals);
+        uint256 interestAmountInRay = DSMath.getInRay(interestAmount, currentDecimals);
+        uint256 loanAmountInRay = DSMath.getInRay(loanAmount, currentDecimals);
+        uint256 seniorPoolInvestmentInRay = DSMath.getInRay(seniorPoolInvestment, currentDecimals);
+
+        uint256 totalSeniorPoolInterest =
+            DSMath.rdiv(DSMath.rmul(interestAmountInRay, seniorPoolInvestmentInRay), loanAmountInRay);
+
+        uint256 underwriterFeesOnInterest = DSMath.rmul(totalSeniorPoolInterest, underwriterFeesInRay);
+
+        uint256 finalSeniorPoolInterest = DSMath.sub(
+            DSMath.sub(totalSeniorPoolInterest, DSMath.rmul(totalSeniorPoolInterest, reignFeesInRay)),
+            underwriterFeesOnInterest
+        );
+
+        uint256 totalJuniorPoolInterest = DSMath.rdiv(
+            DSMath.rmul(interestAmountInRay, DSMath.sub(loanAmountInRay, seniorPoolInvestmentInRay)), loanAmountInRay
+        );
+
+        uint256 finalJuniorPoolInterest = DSMath.add(
+            DSMath.sub(totalJuniorPoolInterest, DSMath.rmul(totalJuniorPoolInterest, reignFeesInRay)),
+            underwriterFeesOnInterest
+        );
+
+        return (finalSeniorPoolInterest.div(10 ** 21), finalJuniorPoolInterest.div(10 ** 21));
+    }
 }
