@@ -36,4 +36,29 @@ library Accounting {
 
         return emiAmountInRay.div(10 ** 21);
     }
+
+    //Loan using standard EMI calculation P x R / t
+    function getBulletLoanEMI(uint256 loanAmount, uint256 loanInterest, uint256 paymentFrequencyInDays)
+        internal
+        pure
+        returns (uint256)
+    {
+        require(loanAmount > 0 && loanInterest > 0 && paymentFrequencyInDays > 0, "Invalid Input");
+
+        //Monthly Interest
+        uint256 interestPerMonth = DSMath.rdiv(
+            DSMath.rdiv(DSMath.getInRay(loanInterest, currentDecimals), (12 * DSMath.RAY)), (100 * DSMath.RAY)
+        );
+
+        //Interest for repayment
+        uint256 interestForRepaymentDays = DSMath.rmul(
+            interestPerMonth,
+            DSMath.rdiv((paymentFrequencyInDays * DSMath.RAY), (Constants.oneMonthInDays() * DSMath.RAY))
+        );
+
+        //EMI
+        uint256 loanAmountInRay = DSMath.getInRay(loanAmount, currentDecimals);
+        uint256 emiAmountInRay = DSMath.rmul(loanAmountInRay, interestForRepaymentDays);
+        return emiAmountInRay.div(10 ** 21);
+    }
 }
