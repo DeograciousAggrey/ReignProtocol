@@ -35,9 +35,9 @@ contract BaseUpgradeablePausable is
         __ReentrancyGuard_init_unchained();
 
         _setupRole(Constants.getAdminRole(), owner);
-        _setupRole(Constants.pauserRole(), owner);
+        _setupRole(Constants.getPauserRole(), owner);
 
-        _setRoleAdmin(Constants.pauserRole(), Constants.getAdminRole());
+        _setRoleAdmin(Constants.getPauserRole(), Constants.getAdminRole());
         _setRoleAdmin(Constants.getAdminRole(), Constants.getAdminRole());
     }
 
