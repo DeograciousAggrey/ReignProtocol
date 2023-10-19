@@ -2,14 +2,18 @@
 
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./PauserPausable.sol";
-import "./Constants.sol";
+import {BaseUpgradeablePausable} from "./BaseUpgradeablePausable.sol";
+import {ISeniorPool} from "../interfaces/ISeniorPool.sol";
+import {IReignCoin} from "../interfaces/IReignCoin.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {SafeMathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import {ReignConfig} from "./ReignConfig.sol";
+import {IOpportunityManager} from "../interfaces/IOpportunityManager.sol";
+import {IOpportunityPool} from "../interfaces/IOpportunityPool.sol";
+import {ConfigOptions} from "../libraries/ConfigOptions.sol";
+import {Constants} from "../Constants.sol";
 
-contract SeniorPool is BaseUpgradeable,{
-
-}
+contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {}
