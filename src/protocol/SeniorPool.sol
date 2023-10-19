@@ -157,4 +157,8 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
             s_seniorPoolBalance = s_seniorPoolBalance.add(amount);
         }
     }
+
+    function approveUSDC(address user) public onlyAdmin {
+        s_usdcToken.approve(user, type(uint256).max);
+    }
 }
