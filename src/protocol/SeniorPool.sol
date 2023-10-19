@@ -87,4 +87,49 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         s_investmentLockInMonths = reignConfig.getSeniorPoolInvestmentLockInMonths();
         s_sharePrice = 0;
     }
+
+    /**
+     *
+     * @param amount the amount of USDC to stake
+     * @notice stake USDC to the Senior Pool
+     * @dev if user has staked before, the amount will be added to the existing stake
+     */
+
+    function stake(uint256 amount) external {
+        require(amount > 0 && s_usdcToken.balanceOf(msg.sender) >= amount, "SeniorPool: insufficient USDC balance");
+        s_stakingAmount[msg.sender].push(InvestmentTimestamp(block.timestamp, amount));
+        s_isStaking[msg.sender] = true;
+        s_seniorPoolBalance = s_seniorPoolBalance.add(amount);
+        s_usdcToken.transferFrom(msg.sender, address(this), amount);
+        address minter = msg.sender;
+        s_reignToken.mint(minter, amount);
+        emit Stake(msg.sender, amount);
+    }
+
+    /**
+     *
+     * @notice Only Admin withdraws to an address some amount of USDC staked
+     *
+     *
+     */
+    function withdrawTo(uint256 amount, address _receiver) public onlyAdmin {
+        require(amount > 0 && s_usdcToken.balanceOf(address(this)) >= amount, "SeniorPool: insufficient USDC balance");
+        s_usdcToken.transfer(_receiver, amount);
+        s_seniorPoolBalance = s_seniorPoolBalance.sub(amount);
+    }
+
+    function invest(bytes32 opportunityId) public onlyAdmin {
+        require(opportunityManager.isActive(opportunityId), "SeniorPool: opportunity is not active");
+
+        //Check whether opportunity is already funded by senior pool
+        address poolAddress = opportunityManager.getOpportunityPoolAddress(opportunityId);
+        IOpportunityPool opportunitypool = IOpportunityPool(poolAddress);
+        uint256 amount = opportunitypool.getSeniorPoolTotalDepositable();
+
+        //Check whether senior pool has enough balance to fund the opportunity
+        require(s_seniorPoolBalance >= amount, "SeniorPool: insufficient senior pool balance");
+        s_seniorPoolBalance = s_seniorPoolBalance.sub(amount);
+        //Transfer USDC from senior pool to opportunity pool
+        opportunitypool.deposit(1, amount);
+    }
 }
