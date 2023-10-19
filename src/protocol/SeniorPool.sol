@@ -132,4 +132,29 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         //Transfer USDC from senior pool to opportunity pool
         opportunitypool.deposit(1, amount);
     }
+
+    function withdrawFromOpportunity(bool _isWriteOff, bytes32 opportunityId, uint256 amount) public override {
+        require(
+            opportunityManager.isRepaid(opportunityId) == true || _isWriteOff == true,
+            "SeniorPool: opportunity is not repaid"
+        );
+        address poolAddress = opportunityManager.getOpportunityPoolAddress(opportunityId);
+        IOpportunityPool opportunitypool = IOpportunityPool(poolAddress);
+        require(msg.sender == poolAddress, "SeniorPool: caller is not opportunity pool");
+
+        //Calculate share price
+        uint256 totalprofit;
+        if (_isWriteOff == true) totalprofit = _amount;
+        else totalprofit = opportunitypool.getSeniorProfit();
+        uint256 totalShares = s_reignToken.totalSupply();
+        uint256 delta = totalprofit.mul(lpMantissa).div(totalShares);
+        s_sharePrice = s_sharePrice.add(delta);
+
+        if (_isWriteOff == false) {
+            uint256 withdrawableAmount = opportunitypool.getUserWithdrawableAmount();
+            s_seniorPoolBalance = s_seniorPoolBalance.add(withdrawableAmount);
+        } else {
+            s_seniorPoolBalance = s_seniorPoolBalance.add(amount);
+        }
+    }
 }
