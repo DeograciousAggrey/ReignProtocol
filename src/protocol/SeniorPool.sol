@@ -264,4 +264,17 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         //Emit event
         emit Unstake(msg.sender, amount);
     }
+
+    function totalShares() internal view returns (uint256) {
+        require(address(s_reignToken) != address(0), "SeniorPool: reignToken address cannot be zero address");
+        return s_reignToken.totalSupply();
+    }
+
+    function lpMantissa() internal view returns (uint256) {
+        return uint256(10) ** uint256(6);
+    }
+
+    function getUSDCAmountFromShares(uint256 amount) internal view returns (uint256) {
+        return amount.add(amount.mul(s_sharePrice).div(lpMantissa()));
+    }
 }
