@@ -199,4 +199,16 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         }
         return stakingAmt;
     }
+
+    function sanitizeInputDEcimalDiscrepancies(uint256 inputAmt, uint256 withdrawableAmt)
+        internal
+        pure
+        returns (uint256)
+    {
+        if (inputAmt > withdrawableAmt && (inputAmt - withdrawableAmt) < lpMantissa()) {
+            amount = withdrawableAmt;
+        } else {
+            amount = inputAmt;
+        }
+    }
 }
