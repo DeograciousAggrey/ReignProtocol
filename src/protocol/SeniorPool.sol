@@ -184,4 +184,19 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
 
         return (withdrawableAmt, stakingAmt);
     }
+
+    function getDefaultLockInMonths() external view returns (uint256) {
+        return s_investmentLockInMonths;
+    }
+
+    function getTotalStakingBalance() internal view returns (uint256) {
+        require(s_isStaking[msg.sender] == true, "SeniorPool: user is not staking");
+
+        uint256 stakingAmt;
+        InvestmentTimestamp[] memory investments = s_stakingAmount[msg.sender];
+        for (uint256 i = 0; i < investments.length; i++) {
+            stakingAmt = stakingAmt.add(investments[i].amount);
+        }
+        return stakingAmt;
+    }
 }
