@@ -167,7 +167,7 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
 
         uint256 stakingAmt;
         uint256 withdrawableAmt;
-        uint256 lockInTime = s_investmentLockInMonths * constants.oneMonth();
+        uint256 lockInTime = s_investmentLockInMonths * Constants.oneMonth();
         InvestmentTimestamp[] memory investments = s_stakingAmount[msg.sender];
 
         for (uint256 i = 0; i < investments.length; i++) {
@@ -200,7 +200,7 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         return stakingAmt;
     }
 
-    function sanitizeInputDEcimalDiscrepancies(uint256 inputAmt, uint256 withdrawableAmt)
+    function sanitizeInputDecimalDiscrepancies(uint256 inputAmt, uint256 withdrawableAmt)
         internal
         pure
         returns (uint256)
@@ -210,5 +210,58 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         } else {
             amount = inputAmt;
         }
+    }
+
+    function withdrawWithLP(uint256 amount) external {
+        require(s_isStaking[msg.sender] == true && amount > 0, "SeniorPool: invalid amount or user is not staking");
+
+        //Calculate Amount available for investment
+        uint256 stakingAmount;
+        uint256 lockInTime = s_investmentLockInMonths * Constants.oneMonth();
+        InvestmentTimestamp[] storage investments = s_stakingAmount[msg.sender];
+
+        for (uint256 i; i < investments.length; i++) {
+            if (investments[i].timestamp.add(lockInTime) <= block.timestamp) {
+                s_availableToWithdraw[msg.sender] = s_availableToWithdraw[msg.sender].add(investments[i].amount);
+                delete investments[i];
+            } else {
+                stakingAmount = stakingAmount.add(investments[i].amount);
+            }
+        }
+
+        //Sanitize if there is decimal discrepancy with input amount and available amount
+        uint256 withdrawableAmt = s_availableToWithdraw[msg.sender];
+        amount = sanitizeInputDecimalDiscrepancies(amount, withdrawableAmt);
+        require(amount <= withdrawableAmt, "SeniorPool: insufficient withdrawable amount");
+        s_availableToWithdraw[msg.sender] = s_availableToWithdraw[msg.sender].sub(amount);
+
+        if (getTotalStakingBalance() == 0 && s_availableToWithdraw[msg.sender] == 0) {
+            s_isStaking[msg.sender] = false;
+        }
+
+        //Calculate total USDC based on share price
+        uint256 usdcAmount = getUSDCFromShares(amount);
+
+        //Update senior pool balance
+        s_seniorPoolBalance = s_seniorPoolBalance.sub(usdcAmount);
+
+        //Update share price
+        uint256 totalSharesAfterWithdrawal = totalShares().sub(amount);
+
+        //For small misc values when totalSharesAfterWithdrawal is 0 set share price to 0
+        if (s_seniorPoolBalance < lpMantissa() || totalSharesAfterWithdrawal == 0) {
+            s_sharePrice = 0;
+        } else {
+            uint256 availableProfit = s_seniorPoolBalance.sub(totalSharesAfterWithdrawal);
+            s_sharePrice = availableProfit.mul(lpMantissa()).div(totalSharesAfterWithdrawal);
+        }
+        //Burn the lp equivalent of the amount
+        s_reignToken.burn(msg.sender, amount);
+
+        //Transfer USDC to user
+        s_usdcToken.transfer(msg.sender, usdcAmount);
+
+        //Emit event
+        emit Unstake(msg.sender, amount);
     }
 }
