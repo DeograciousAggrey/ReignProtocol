@@ -161,4 +161,27 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
     function approveUSDC(address user) public onlyAdmin {
         s_usdcToken.approve(user, type(uint256).max);
     }
+
+    function getUserInvestment() external view returns (uint256 withdrawableAmount, uint256 stakingAmount) {
+        require(s_isStaking[msg.sender] == true, "SeniorPool: user is not staking");
+
+        uint256 stakingAmt;
+        uint256 withdrawableAmt;
+        uint256 lockInTime = s_investmentLockInMonths * constants.oneMonth();
+        InvestmentTimestamp[] memory investments = s_stakingAmount[msg.sender];
+
+        for (uint256 i = 0; i < investments.length; i++) {
+            if (investments[i].timestamp.add(lockInTime) <= block.timestamp) {
+                withdrawableAmt = withdrawableAmt.add(investments[i].amount);
+            } else {
+                stakingAmt = stakingAmt.add(investments[i].amount);
+            }
+        }
+
+        if (s_availableToWithdraw[msg.sender] > 0) {
+            withdrawableAmt = withdrawableAmt.add(s_availableToWithdraw[msg.sender]);
+        }
+
+        return (withdrawableAmt, stakingAmt);
+    }
 }
