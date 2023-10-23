@@ -26,5 +26,7 @@ contract Investor is BaseUpgradeablePausable, IInvestor {
         _BaseUpgradeablePausable_init(owner);
     }
 
-    function addOpportunity(address _investor, bytes32 _opportunityId) external override {}
+    function addOpportunity(address _investor, bytes32 _opportunityId) external override {
+        address poolAddress = opportunityManager.getOpportunityPool(_opportunityId);
+    }
 }
