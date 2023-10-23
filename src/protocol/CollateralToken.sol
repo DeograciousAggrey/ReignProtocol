@@ -44,25 +44,25 @@ contract CollateralToken is
         __ERC721Burnable_init();
         __UUPSUpgradeable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
-        _grantRole(Constants.pauserRole(), owner);
-        _grantRole(Constants.minterRole(), owner);
-        _grantRole(Constants.minterRole(), _minterRole);
-        _grantRole(Constants.upgraderRole(), owner);
+        _grantRole(Constants.getPauserRole(), owner);
+        _grantRole(Constants.getMinterRole(), owner);
+        _grantRole(Constants.getMinterRole(), _minterRole);
+        _grantRole(Constants.getUpgraderRole(), owner);
     }
 
     function _baseURI() internal pure override returns (string memory) {
         return "ipfs://";
     }
 
-    function pause() public onlyRole(Constants.pauserRole()) {
+    function pause() public onlyRole(Constants.getPauserRole()) {
         _pause();
     }
 
-    function unpause() public onlyRole(Constants.pauserRole()) {
+    function unpause() public onlyRole(Constants.getPauserRole()) {
         _unpause();
     }
 
-    function safeMint(address to, string memory uri) public onlyRole(Constants.minterRole()) {
+    function safeMint(address to, string memory uri) public onlyRole(Constants.getMinterRole()) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
@@ -73,7 +73,7 @@ contract CollateralToken is
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(Constants.upgraderRole()) {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(Constants.getUpgraderRole()) {}
 
     // The following functions are overrides required by Solidity.
 
