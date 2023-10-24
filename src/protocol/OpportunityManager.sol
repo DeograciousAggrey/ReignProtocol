@@ -65,5 +65,27 @@ contract OpportunityManager is BaseUpgradeablePausable, IOpportunityManager {
         require(
             bytes(_opportunityData.opportunityName).Length <= 50, "Length of Opportunity Name should be less than 50"
         );
+        bytes32 id = keccak256(abi.encodePacked(_opportunityData.collateralDocument));
+        require(!s_isOpportunity[id], "SAme collateral document has been used to create opprotunity");
+
+        Opportunity memory _opportunity;
+        _opportunity.opportunityId = id;
+        _opportunity.borrower = _opportunityData.borrower;
+        _opportunity.opportunityName = _opportunityData.opportunityName;
+        _opportunity.opportunityDescription = _opportunityData.opportunityDescription;
+        _opportunity.loanType = _opportunityData.loanType;
+        _opportunity.loanAmount = _opportunityData.loanAmount;
+        _opportunity.loanTenureInDays = _opportunityData.loanTermInDays;
+        _opportunity.loanInterest = _opportunityData.loanInterest;
+        _opportunity.paymentFrequencyInDays = _opportunityData.paymentFrequencyInDays;
+        _opportunity.collateralDocument = _opportunityData.collateralDocument;
+        _opportunity.capitalLoss = _opportunityData.capitalLoss;
+        _opportunity.loanStartTime = block.timestamp;
+        s_writeOffDaysOf = reignConfig.getWriteOffDays();
+
+        s_opportunityToId[id] = _opportunity;
+        s_opportunityOfBorrower[_opportunityData.borrower].push(id);
+        s_opportunityIds.push(id);
+        s_isOpportunity[id] = true;
     }
 }
