@@ -88,4 +88,22 @@ contract OpportunityManager is BaseUpgradeablePausable, IOpportunityManager {
         s_opportunityIds.push(id);
         s_isOpportunity[id] = true;
     }
+
+    function assignUnderwriter(bytes32 _opportunityId, address _underwiter)
+        external
+        override
+        onlyAdmin
+        nonReentrant
+        whenNotPaused
+    {
+        require(_underwiter != 0, "Invalid address");
+        require(s_isOpportunity[_opportunityId] == true, "Opportunity doesn't exist");
+        require(
+            s_opportunityToId[_opportunityId].opportunityStatus == OpportunityStatus.UnderReview,
+            "Opportunity is already judged"
+        );
+
+        s_underwritersOf[_opportunityId][0] = _underwiter;
+        s_underwriterToOpportunity[_underwiter].push(_opportunityId);
+    }
 }
