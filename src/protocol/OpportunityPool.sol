@@ -101,7 +101,45 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         if (reignConfig.getFlag(_opportunityID)== false) {
             // follow 4x leverage ratio
             s_seniorSubpoolDetails.isPoolLocked = true;
+            uint256 temp = s_loanAmount.div(reignConfig.getLeverageRatio() + 1);
+            s_seniorSubpoolDetails.totalDepositable = temp.mul(reignConfig.getLeverageRatio());
+
+            s_juniorSubpoolDetails.totalDepositable = s_loanAmount - s_seniorSubpoolDetails.totalDepositable;
             
+        } else {
+            s_juniorSubpoolDetails.isPoolLocked = true;
+            s_seniorSubpoolDetails.totalDepositable = s_loanAmount;
         }
+
+        s_totalRepayments = s_loanTenureInDays.div(s_paymentFrequencyInDays);
+
+        if(s_loanType == 1){
+            s_emiAmount = Accounting.getTermLoanEMI(s_loanAmount, s_loanInterest, s_totalRepayments, s_paymentFrequencyInDays);
+
+
+        } else {
+            s_emiAmount = Accounting.getBulletLoanEMI(s_loanAmount, s_loanInterest, s_paymentFrequencyInDays);
+        }
+
+        s_dailyOverdueInterestRate = reignConfig.getOverDueFee().div(Constants.oneYearInDays());
+
+
+        (s_seniorYieldPercentage, s_juniorYieldPercentage) = Accounting.getYieldPercentage(
+            reignConfig.getReignFee(),
+            reignConfig.getJuniorSubpoolFee(),
+            s_loanType == 1,
+            s_emiAmount,
+            s_loanAmount,
+            s_totalRepayments,
+            s_loanInterest,
+            reignConfig.getLeverageRatio(),
+            s_loanTenureInDays
+        );
+
+        (s_seniorOverduePercentage, s_juniorOverduePercentage) = getOverDuePercentage();
+
+
+
+
     }
 }
