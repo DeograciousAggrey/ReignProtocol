@@ -18,10 +18,12 @@ import {ISeniorPool} from "../interfaces/ISeniorPool.sol";
 
 contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
     ReignConfig public reignConfig;
+
     using ConfigHelper for ReignConfig;
     using SafeMathUpgradeable for uint256;
     using SafeERC20Upgradeable for IERC20;
     using SafeERC20 for IERC20;
+
     IOpportunityManager public opportunityManager;
     IInvestor public investor;
 
@@ -48,43 +50,58 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
     uint256 public s_juniorOverduePercentage;
     bool public s_isDrawdownsPaused;
 
+    mapping(address => uint256) public s_stakingBalance;
+    mapping(address => bool) public override isStaking;
 
-    mapping
+    SubPoolDetails public s_seniorSubpoolDetails;
+    SubPoolDetails public s_juniorSubpoolDetails;
 
+    event Deposited(address indexed executor, uint8 indexed subpool, uint256 amount);
+    event withdrew(address indexed executor, uint8 indexed subpool, uint256 amount);
 
+    function initialize(
+        ReignConfig _reignconfig,
+        bytes32 _opportunityID,
+        uint256 _loanAmount,
+        uint256 _loanTenureInDays,
+        uint256 _loanInterest,
+        uint256 _paymentFrequencyInDays,
+        uint8 _loanType
+    ) external override initializer {
+        require(address(_reignconfig) != address(0), "Reign config address is zero");
+        reignConfig = _reignconfig;
+        address owner = reignConfig.reignAdminAddress();
+        require(owner != address(0), "Owner address is zero");
+        opportunityManager = IOpportunityManager(reignConfig.getOpportunityOrigination());
+        investor = IInvestor(reignConfig.investorContractAddress());
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        _BaseUpgradeablePausable_init(owner);
+        usdcToken = IERC20(reignConfig.usdcAddress());
+        reignToken = IReignCoin(reignConfig.reignCoinAddress());
+        _setRoleAdmin(Constants.getSeniorPoolRole(), Constants.getAdminRole());
+        _setupRole(Constants.getSeniorPoolRole(, reignConfig.seniorPoolAddress()));
+        _setRoleAdmin(Constants.getBorrowerRole(), Constants.getAdminRole());
+        _setRoleAdmin(Constants.getPoolLockerRole(), Constants.getAdminRole());
+        _setupRole(Constants.getPoolLockerRole(), owner);
 
 
+        address borrower = opportunityManager.getBorrowerAddress(_opportunityID);
+        _setupRole(Constants.getBorrowerRole(), borrower);
+        s_opportunityId = _opportunityID;       
+        s_loanAmount = _loanAmount;
+        s_totalOutstandingPrincipal = _loanAmount;
+        s_loanTenureInDays = _loanTenureInDays;
+        s_loanInterest = _loanInterest;
+        s_paymentFrequencyInDays = _paymentFrequencyInDays;
+        s_repaymentCounter = 1;
+        s_loanType = _loanType;
 
 
+
+        if (reignConfig.getFlag(_opportunityID)== false) {
+            // follow 4x leverage ratio
+            s_seniorSubpoolDetails.isPoolLocked = true;
+            
+        }
+    }
 }
