@@ -458,7 +458,9 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         return s_seniorSubpoolDetails.totalDepositable;
     }
 
-    function get
+    function getSeniorProfit() external override view returns(uint256) {
+        return s_seniorSubpoolDetails.yieldGenerated + s_seniorSubpoolDetails.overdueGenerated;
+    }
 
 
 
