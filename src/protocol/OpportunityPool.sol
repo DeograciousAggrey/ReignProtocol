@@ -196,4 +196,52 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         usdcToken.safeTransferFrom(address(this), msg.sender, amount);
     }
 
+    function repayment() public override nonReentrant onlyBorrower {
+        require(s_repaymentCounter <= s_totalRepayments, "All repayments are done");
+        require(opportunityManager.isDrawdown(s_opportunityId), "Drawdown is not done");
+
+        uint256 currentRepaymentTime = block.timestamp;
+        uint26 currentRepaymentDue = nextRepaymentTime();
+        uint256 overDueFee;
+
+        if (currentTime > currentRepaymentDue) {
+            uint256 overDueSeconds = currentTime.sub(currentRepaymentDue).div(86400);
+            overDueFee = overDueSeconds.mul(s_dailyOverdueInterestRate.div(100)).mul(s_emiAmount).div(Constants.sixDecimal());
+        }
+
+        //Term loan
+        if(s_loanType == 1) {
+            uint256 amount = s_emiAmount;
+            s_totalRepaidAmount += s_emiAmount;
+
+            //interest from emi
+
+            uint256 interest = Accounting.getTermLoanInterest(s_totalOutstandingPrincipal, s_paymentFrequencyInDays, s_loanInterest);
+            uint256 principalReceived = s_emiamount.sub(interest);
+            s_totalOutstandingPrincipal = s_totalOutstandingPrincipal.sub(principalReceived.sub(reignConfig.getAdjustmentOffset()));
+            
+            uint256 juniorPoolPrincipalportion = principalReceived.div(reignConfig.getLeverageRatio().add(1));
+
+            uint256 seniorPoolPrincipalportion = juniorPoolPrincipalportion.mul(reignConfig.getLeverageRatio());
+
+
+            s_seniorSubpoolDetails.depositedAmount = s_seniorSubpoolDetails.depositedAmount.add(seniorPoolPrincipalportion);
+
+            s_juniorSubpoolDetails.depositedAmount = s_juniorSubpoolDetails.depositedAmount.add(juniorPoolPrincipalportion);
+
+
+
+            //Yield Distribution
+            uint256 seniorPoolInterest;
+            uint256 juniorPoolInterest;
+            (seniorPoolInterest, juniorPoolInterest) = Accounting.getInterestDistribution(reignConfig.getReignFee(), reignConfig.getJuniorSubpoolFee(), interest, reignConfig.getLeverageRatio(), s_loanAmount, s_seniorSubpoolDetails.totalDepositable);
+            s_seniorSubpoolDetails.yieldGenerated = s_seniorSubpoolDetails.yieldGenerated.add(seniorPoolInterest);
+            s_juniorSubpoolDetails.yieldGenerated = s_juniorSubpoolDetails.yieldGenerated.add(juniorPoolInterest);
+
+            //Overdue Amount Distribution
+            s_juniorSubpoolDetails.overdueGenerated = s_juniorSubpoolDetails.overdueGenerated.add(s_juniorOverduePercentage.mul(overDueFee).div(Constants.sixDecimal()));
+            s_seniorSubpoolDetails.overdueGenerated = s_seniorSubpoolDetails.overdueGenerated.add(s_seniorOverduePercentage.mul(overDueFee).div(Constants.sixDecimal()));
+        }
+    }
+
 }
