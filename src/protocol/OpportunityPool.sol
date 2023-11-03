@@ -563,5 +563,15 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
 
     }
 
+    function getSeniorPoolWithdrawableAmount() external override view returns(uint256 amount) {
+        require(s_seniorSubpoolDetails.isPoolLocked == false, "Senior subpool is locked");
+
+        amount = s_seniorSubpoolDetails.depositedAmount.add(s_seniorSubpoolDetails.yieldGenerated);
+
+        amount = amount.add(s_seniorSubpoolDetails.overdueGenerated);
+
+        return amount;
+    }
+
 
 }
