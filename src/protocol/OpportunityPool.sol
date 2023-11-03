@@ -241,7 +241,80 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
             //Overdue Amount Distribution
             s_juniorSubpoolDetails.overdueGenerated = s_juniorSubpoolDetails.overdueGenerated.add(s_juniorOverduePercentage.mul(overDueFee).div(Constants.sixDecimal()));
             s_seniorSubpoolDetails.overdueGenerated = s_seniorSubpoolDetails.overdueGenerated.add(s_seniorOverduePercentage.mul(overDueFee).div(Constants.sixDecimal()));
+        
+            //Sending funds in Rign treasury
+            uint256 reignTreasury = interest.mul(reignConfig.getReignFee()).div(Constants.sixDecimal());
+            reignTreasury += overDueFee.mul(reignConfig.getReignFee()).div(Constants.sixDecimal());
+
+
+            amount = amount.add(overDueFee);
+            s_poolBalance = s_poolBalance.add(reignTreasury);
+
+            usdcToken.safeTransferFrom(msg.sender, address(this), amount);
+
+            usdcToken.transfer(reignConfig.reignTreasuryAddress(), reignTreasury);
+
+        } else {
+            uint256 amount = s_emiAmount;
+            s_totalRepaidAmount += amount;
+
+
+            //Yield Distribution
+            uint256 seniorPoolInterest;
+            uint256 juniorPoolInterest;
+            (seniorPoolInterest, juniorPoolInterest) = Accounting.getInterestDistribution(reignConfig.getReignFee(), reignConfig.getJuniorSubpoolFee(), amount, reignConfig.getLeverageRatio(), s_loanAmount, s_seniorSubpoolDetails.totalDepositable);
+            s_seniorSubpoolDetails.yieldGenerated = s_seniorSubpoolDetails.yieldGenerated.add(seniorPoolInterest);
+            s_juniorSubpoolDetails.yieldGenerated = s_juniorSubpoolDetails.yieldGenerated.add(juniorPoolInterest);
+
+
+            //Overdue Amount Distribution
+            s_juniorSubpoolDetails.overdueGenerated = s_juniorSubpoolDetails.overdueGenerated.add(s_juniorOverduePercentage.mul(overDueFee).div(Constants.sixDecimal()));
+            s_seniorSubpoolDetails.overdueGenerated = s_seniorSubpoolDetails.overdueGenerated.add(s_seniorOverduePercentage.mul(overDueFee).div(Constants.sixDecimal()));
+
+            //Sending funds in Rign treasury
+            uint256 reignTreasury = amount.mul(reignConfig.getReignFee()).div(Constants.sixDecimal());
+            reignTreasury += (overDueFee.mul(reignConfig.getReignFee()).div(Constants.sixDecimal()));
+
+            if(s_repaymentCounter == s_totalRepayments) {
+                amount = amount.add(s_loanAmount);
+                s_totalRepaidAmount = s_totalRepaidAmount.add(s_loanAmount);
+                s_seniorSubpoolDetails.depositedAmount = s_seniorSubpoolDetails.totalDepositable;
+                s_juniorSubpoolDetails.depositedAmount = s_juniorSubpoolDetails.totalDepositable;
+            }
+
+            amount = amount.add(overDueFee);
+            s_poolBalance = s_poolBalance.add(amount);
+
+            usdcToken.safeTransferFrom(msg.sender, address(this), amount);
+
+            usdcToken.transfer(reignConfig.reignTreasuryAddress(), reignTreasury);
+
+        }
+
+        if (s_repaymentCounter == s_totalRepayments) {
+            opportunityManager.markRepaid(s_opportunityId);
+            ISeniorPool(reignConfig.seniorPoolAddress())withdrawFromOppoortunity(false, s_opportunityId,0);
+
+
+            //Autosend all funs to senior pool since all repayments are done
+            uint256 seniorAmount = s_seniorSubpoolDetails.depositedAmount.add(s_seniorSubpoolDetails.yieldGenerated);
+
+            if(s_seniorSubpoolDetails.overdueGenerated > 0) {
+                seniorAmount = seniorAmount.add(s_seniorSubpoolDetails.overdueGenerated);
+                s_seniorSubpoolDetails.overdueGenerated = 0;
+            }
+
+            s_seniorSubpoolDetails.depositedAmount = 0;
+            s_seniorSubpoolDetails.yieldGenerated = 0;
+            s_poolBalance = s_poolBalance.sub(seniorAmount);
+            usdcToken.safeTransfer(reignConfig.seniorPoolAddress(), seniorAmount);
+
+
+        } else {
+            s_repaymentCounter = s_repaymentCounter.add(1);
         }
     }
+
+    
 
 }
