@@ -508,7 +508,60 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
     }
 
 
+    function writeOffOpportunity() external override {
+        require(opportunityManager.isWriteOff(s_opportunityId) == true, "Opportunity is not write off");
+        require(msg.sender == reignConfig.getOpportunityOrigination(), "Caller is not opportunity Manager");
 
+        uint256 temp = s_loanAmount.div(reignConfig.getLeverageRatio() + 1);
+        uint256 tempSenior = temp.mul(reignConfig.getLeverageRatio());
+        uint256 estimatedSeniorYield = s_seniorYieldPercentage.mul(tempSenior).div(Constants.sixDecimal());
+
+        uint256 remainingOverdue;
+        if (s_loanType == 1) {
+            uint256 currentTime = block.timestamp;
+            uint256 currentRepaymentDue = nextRepaymentTime();
+            uint256 overDueFee;
+
+            if (currentTime > currentRepaymentDue) {
+                uint256 overDueSeconds = currentTime.sub(currentRepaymentDue).div(86400);
+                overDueFee = overDueSeconds.mul(s_dailyOverdueInterestRate.div(100)).mul(s_emiAmount).div(Constants.sixDecimal());
+            }
+
+            remainingOverdue = overDueFee;
+        } else {
+            uint256 amount = s_emiAmount;
+            uint256 currentTime = block.timestamp;
+            uint256 currentRepaymentDue = nextRepaymentTime();
+            uint256 overDueFee;
+
+            if (currentTime > currentRepaymentDue) {
+                uint256 overDueSeconds = currentTime.sub(currentRepaymentDue).div(86400);
+                overDueFee = overDueSeconds.mul(s_dailyOverdueInterestRate.div(100)).mul(s_emiAmount).div(Constants.sixDecimal());
+            }
+            remainingOverdue = overDueFee;
+        }
+
+        remainingOverdue = s_seniorOverduePercentage.mul(remainingOverdue).div(Constants.sixDecimal());
+        uint256 estimateOverDue = remainingOverdue.add(s_seniorSubpoolDetails.overdueGenerated);
+
+        uint256 estimatedSeniorPoolAmount = estimateOverDue + estimatedSeniorYield + s_seniorSubpoolDetails.totalDepositable;
+
+        if(s_poolBalance > estimatedSeniorPoolAmount) {
+            ISeniorPool(reignConfig.seniorPoolAddress()).withdrawFromOppoortunity(true, s_opportunityId, estimatedSeniorPoolAmount);
+
+            s_seniorSubpoolDetails.depositedAmount = 0;
+            s_seniorSubpoolDetails.yieldGenerated = 0;
+            s_seniorSubpoolDetails.overdueGenerated = 0;
+        } else {
+            ISeniorPool(reignConfig.seniorPoolAddress()).withdrawFromOppoortunity(true, s_opportunityId, s_poolBalance);
+
+            s_seniorSubpoolDetails.depositedAmount = 0;
+            s_seniorSubpoolDetails.yieldGenerated = 0;
+            s_seniorSubpoolDetails.overdueGenerated = 0;
+        }
+
+
+    }
 
 
 }
