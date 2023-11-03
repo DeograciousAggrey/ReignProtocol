@@ -499,6 +499,9 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         s_isDrawdownsPaused = true;
     }
 
+    function unpauseDrawdown() public onlyAdmin {
+        s_isDrawdownsPaused = false;
+    }
 
 
 
