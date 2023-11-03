@@ -181,4 +181,19 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         usdcToken.safeTransferFrom(msg.sender, address(this), amount);
         emit Deposited(msg.sender, _subpoolId, amount);
     }
+
+    function drawdown() public override nonReentrant whenNotPaused onlyBorrower {
+        require(opportunityManager.isDrawdown(s_opportunityId) == false, "Drawdown already done");
+        require(s_isDrawdownsPaused == false, "Drawdowns are paused");
+        require(s_poolBalance == s_loanAmount, "Pool balance is not equal to loan amount");
+
+        uint256 amount = s_poolBalance;
+        s_poolBalance = 0;
+        s_seniorSubpoolDetails.depositedAmount = 0;
+        s_juniorSubpoolDetails.depositedAmount = 0;
+        s_repaymentStartTime = block.timestamp;
+        opportunityManager.markDrawdown(s_opportunityId);
+        usdcToken.safeTransferFrom(address(this), msg.sender, amount);
+    }
+
 }
