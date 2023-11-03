@@ -144,6 +144,21 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
 
     }
 
+    ////////////////////////////////////
+    ///////   Modifiers    /////////////
+    ////////////////////////////////////
+
+    modifier onlyBorrower() {
+        require(hasRole(Constants.getBorrowerRole(), msg.sender), "Caller is not borrower");
+        _;
+    }
+
+    modifier onlyPoolLocker() {
+        require(hasRole(Constants.getPoolLockerRole(), msg.sender), "Caller is not pool locker");
+        _;
+    }
+
+
     function deposit(uint8 _subpoolId, uint256 amount) external override nonReentrant {
         require(_subpoolId <= uint8(Subpool.SeniorSubpool), "Invalid subpool id");
         require(amount > 0, "Amount should be greater than zero");
