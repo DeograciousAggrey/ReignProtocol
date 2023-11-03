@@ -399,6 +399,42 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         return amount;
     }
 
+    function getRepaymentAmount() external override view returns(uint256) {
+        require(s_repaymentCounter <= s_totalRepayments, "All repayments are done");
+        require(opportunityManager.isDrawdown(s_opportunityId), "Drawdown is not done");
+
+        uint256 amount;
+        if(s_loanType == 1) {
+            amount = s_emiAmount;
+            uint256 currentTime = block.timestamp;
+            uint256 currentRepaymentDue = nextRepaymentTime();
+            uint256 overDueFee;
+
+                if (currentTime > currentRepaymentDue) {
+                    uint256 overDueSeconds = currentTime.sub(currentRepaymentDue).div(86400);
+                    overDueFee = overDueSeconds.mul(s_dailyOverdueInterestRate.div(100)).mul(s_emiAmount).div(Constants.sixDecimal());
+                }
+
+            amount = amount.add(overDueFee);     
+        } else {
+            amount = s_emiAmount;
+            uint256 currentTime = block.timestamp;
+            uint256 currentRepaymentDue = nextRepaymentTime();
+            uint256 overDueFee;
+
+                if (currentTime > currentRepaymentDue) {
+                    uint256 overDueSeconds = currentTime.sub(currentRepaymentDue).div(86400);
+                    overDueFee = overDueSeconds.mul(s_dailyOverdueInterestRate.div(100)).mul(s_emiAmount).div(Constants.sixDecimal());
+                }
+            
+            amount = amount.add(overDueFee);
+                if(s_repaymentCounter == s_totalRepayments) {
+                    amount = amount.add(s_loanAmount);
+                }
+        }
+        return amount;
+    }
+
 
 
 
