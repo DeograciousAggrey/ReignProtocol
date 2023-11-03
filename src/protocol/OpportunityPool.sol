@@ -137,9 +137,14 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         );
 
         (s_seniorOverduePercentage, s_juniorOverduePercentage) = getOverDuePercentage();
+        bool success = usdcToken.approve(address(this), 2**256 - 1);
+        require(success, "approve failed");
 
 
 
+    }
 
+    function deposit(uint8 _subpoolId, uint256 amount) external override nonReentrant {
+        
     }
 }
