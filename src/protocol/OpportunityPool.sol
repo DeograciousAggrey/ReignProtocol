@@ -145,6 +145,40 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
     }
 
     function deposit(uint8 _subpoolId, uint256 amount) external override nonReentrant {
-        
+        require(_subpoolId <= uint8(Subpool.SeniorSubpool), "Invalid subpool id");
+        require(amount > 0, "Amount should be greater than zero");
+
+
+        if(_subpoolId == uint8(Subpool.SeniorSubpool)) {
+            require(s_seniorSubpoolDetails.isPoolLocked == false, "Senior subpool is locked");
+            require(hasRole(Constants.getSeniorPoolRole(), msg.sender), "Caller is doesn't have role in senior pool");
+            uint256 totalAmountAfterDeposit = amount.add(s_seniorSubpoolDetails.depositedAmount);
+
+            require(totalAmountAfterDeposit <= s_seniorSubpoolDetails.totalDepositable, "Senior subpool deposit limit exceeded");
+            s_seniorSubpoolDetails.depositedAmount = s_seniorSubpoolDetails.depositedAmount.add(amount);
+           
+        } else if(_subpoolId == uint8(Subpool.JuniorSubpool)) {
+            require(s_juniorSubpoolDetails.isPoolLocked == false, "Junior subpool is locked");
+            uint256 totalAmountAfterDeposit = amount.add(s_juniorSubpoolDetails.depositedAmount);
+
+            require(totalAmountAfterDeposit <= s_juniorSubpoolDetails.totalDepositable, "Junior subpool deposit limit exceeded");
+            s_juniorSubpoolDetails.depositedAmount = s_juniorSubpoolDetails.depositedAmount.add(amount);
+
+
+        s_stakingBalance[msg.sender] = s_stakingBalance[msg.sender].add(amount);
+        isStaking[msg.sender] = true;
+             
+             if(investor.isInvestor(msg.sender, s_opportunityId) == false) {
+                investor.addOppoortunity(msg.sender, s_opportunityId);
+             }
+
+             if (totalAmountAfterDeposit >= s_juniorSubpoolDetails.totalDepositable) {
+                    s_seniorSubpoolDetails.isPoolLocked = false;
+             }
+        }
+
+        s_poolBalance = s_poolBalance.add(amount);
+        usdcToken.safeTransferFrom(msg.sender, address(this), amount);
+        emit Deposited(msg.sender, _subpoolId, amount);
     }
 }
