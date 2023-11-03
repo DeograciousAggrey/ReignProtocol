@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IReignCoin} from "../interfaces/IReignCoin.sol";
@@ -433,6 +433,18 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
                 }
         }
         return amount;
+    }
+
+
+    function getOverDuePercentage() public override view returns(uint256, uint256) {
+        uint256 yield = Accounting.getTermLoanInterest(s_totalOutstandingPrincipal, s_paymentFrequencyInDays, s_loanInterest);
+        uint256 juniorInvestment = s_loanAmount.div(reignConfig.getLeverageRatio().add(1));
+        uint256 seniorInvestment = juniorInvestment.mul(reignConfig.getLeverageRatio());
+
+        uint256 _seniorOverduePercentage = (seniorInvestment.mul(s_seniorYieldPercentage)).div(yield);
+        uint256 _juniorOverduePercentage = (juniorInvestment.mul(s_juniorYieldPercentage)).div(yield);
+
+        return (_seniorOverduePercentage, _juniorOverduePercentage);
     }
 
 
