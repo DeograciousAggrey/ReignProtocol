@@ -503,7 +503,9 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         s_isDrawdownsPaused = false;
     }
 
-
+    function getOpportunityName() external override view returns(string memory) {
+        return opportunityManager.getOpportunityName(s_opportunityId);
+    }
 
 
 
