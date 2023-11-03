@@ -315,6 +315,98 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         }
     }
 
-    
+    /**
+     * @notice Withdraws all available funds of the user including principal, interest and overdue fees
+     * @param _subpoolId Subpool id
+     * @return Returns the amount withdrawn
+     * @dev Only the investor can withdraw funds
+     */
+    function withdrawAll(uint8 _subpoolId) external override nonReentrant whenNotPaused returns(uint25) {
+
+        require(_subpoolId <= uint8(Subpool.SeniorSubpool), "Invalid subpool id");
+        require(opportunityManager.isRepaid(s_opportunityId), "Opportunity is not repaid");
+
+        uint256 amount;
+
+        if(_subpoolId == uint8(Subpool.SeniorSubpool)) {
+            require(s_seniorSubpoolDetails.isPoolLocked == false, "Senior subpool is locked");
+            require(hasRole(Constants.getSeniorPoolRole(), msg.sender), "Caller is doesn't have role in senior pool");
+            require(s_seniorSubpoolDetails.depositedAmount > 0, "Senior subpool deposited amount is zero");
+
+
+            amount = s_seniorSubpoolDetails.depositedAmount.add(s_seniorSubpoolDetails.yieldGenerated);
+
+            if(s_seniorSubpoolDetails.overdueGenerated > 0) {
+                amount = amount.add(s_seniorSubpoolDetails.overdueGenerated);
+                s_seniorSubpoolDetails.overdueGenerated = 0;
+            }
+
+            s_seniorSubpoolDetails.depositedAmount = 0;
+            s_seniorSubpoolDetails.yieldGenerated = 0;
+
+
+
+
+        } else if(_subpoolId == uint8(Subpool.JuniorSubpool)) {
+            require(s_juniorSubpoolDetails.isPoolLocked == false, "Junior subpool is locked");
+            require(isStaking[msg.sender] && s_stakingBalance[msg.sender] > 0, "Caller is not staking");
+            uint256 offset = reignConfig.getAdjustmentOffset();
+
+            require(s_stakingBalance[msg.sender] <= s_juniorSubpoolDetails.depositedAmount.add(offset), "Staking balance is greater than deposited amount");
+
+            uint256 yieldEarned = s_juniorSubpoolDetails.yieldGenerated.mul(s_stakingBalance[msg.sender]).div(Constants.sixDecimal());
+            yieldEarned = yieldEarned.sub(offset);
+
+            require(yieldEarned <= s_juniorSubpoolDetails.yieldGenerated, "Yield earned is greater than total yield generated");
+
+            uint256 userStakingBalance = s_stakingBalance[msg.sender].sub(offset);
+            s_juniorSubpoolDetails.depositedAmount = s_juniorSubpoolDetails.depositedAmount.sub(userStakingBalance);
+            s_juniorSubpoolDetails.yieldGenerated = s_juniorSubpoolDetails.yieldGenerated.sub(yieldEarned);
+
+            isStaking[msg.sender] = false;
+            amount = userStakingBalance.add(yieldEarned);
+
+            if(s_juniorSubpoolDetails.overdueGenerated > 0) {
+                uint256 overdueEarned = (s_juniorSubpoolDetails.overdueGenerated.mul(s_stakingBalance[msg.sender])).div(Constants.sixDecimal());
+                amount = amount.add(overdueEarned);
+                s_juniorSubpoolDetails.overdueGenerated = s_juniorSubpoolDetails.overdueGenerated.sub(overdueEarned);
+            }
+
+            investor.removeOppoortunity(msg.sender, s_opportunityId);
+            s_stakingBalance[msg.sender] = 0;
+
+
+    }
+    s_poolBalance = s_poolBalance.sub(amount);
+    usdcToken.transfer(msg.sender, amount);
+    return amount;
+    }
+
+    function getUserWithdrawableAmount() external override view returns(uint256) {
+        require(isStaking[msg.sender] && s_stakingBalance[msg.sender] > 0, "Caller is not staking");
+        uint256 amount = 0;
+
+        if (opportunityManager.isRepaid(s_opportunityId)) {
+            uint256 yieldEarned = s_juniorSubpoolDetails.yieldGenerated.mul(s_stakingBalance[msg.sender]).div(Constants.sixDecimal());
+
+            amount = s_stakingBalance[msg.sender].add(yieldEarned);
+
+            if(s_juniorSubpoolDetails.overdueGenerated > 0) {
+                uint256 overdueEarned = (s_juniorSubpoolDetails.overdueGenerated.mul(s_stakingBalance[msg.sender])).div(Constants.sixDecimal());
+                amount = amount.add(overdueEarned);
+            }
+        }
+        return amount;
+    }
+
+
+
+
+
+
+
+
+
+
 
 }
