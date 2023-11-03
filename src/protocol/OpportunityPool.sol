@@ -477,7 +477,14 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
         return s_seniorSubpoolDetails.yieldGenerated + s_seniorSubpoolDetails.overdueGenerated;
     }
 
-
+    function lockPool(uint8 _subpoolId) public onlyPoolLocker {
+        require(_subpoolId <= uint8(Subpool.SeniorSubpool), "Invalid subpool id");
+        if(_subpoolId == uint8(Subpool.SeniorSubpool)) {
+            s_seniorSubpoolDetails.isPoolLocked = true;
+        } else if(_subpoolId == uint8(Subpool.JuniorSubpool)) {
+            s_juniorSubpoolDetails.isPoolLocked = true;
+        }
+    }
 
 
 
