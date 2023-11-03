@@ -448,6 +448,15 @@ contract opportunityPool is BaseUpgradebalePausable, IOpportunityPool {
     }
 
 
+    function nextRepaymentTime() public override view returns(uint256) {
+        require(s_repaymentCounter <= s_totalRepayments, "All repayments are done");
+        uint256 nextRepaymentDue = s_repaymentStartTime.add(s_repaymentCounter.mul(s_paymentFrequencyInDays).mul(86400));
+        return nextRepaymentDue;
+    }
+
+    
+
+
 
 
 
