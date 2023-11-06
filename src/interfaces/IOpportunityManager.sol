@@ -34,7 +34,7 @@ interface IOpportunityManager {
         uint256 loanAmount;
         uint256 loanTermInDays;
         uint256 loanInterest;
-        uint256 paymentIntervalInDays;
+        uint256 paymentFrequencyInDays;
         string collateralDocument;
         uint256 InvestmentLoss;
         OpportunityStatus opportunityStatus;

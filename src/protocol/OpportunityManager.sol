@@ -26,7 +26,7 @@ contract OpportunityManager is BaseUpgradeablePausable, IOpportunityManager {
     mapping(bytes32 => address[9]) s_underwritersOf;
 
     mapping(address => bytes32[]) public s_underwriterToOpportunity;
-    mapping(bytes32 => uint256) public override s_writeOffDaysOf;
+    mapping(bytes32 => uint256) public override writeOffDaysOfLoan;
 
     bytes32[] public s_opportunityIds;
 
@@ -65,10 +65,11 @@ contract OpportunityManager is BaseUpgradeablePausable, IOpportunityManager {
         require(_opportunityData.loanTermInDays > 0, "Invalid Loan Term");
         require(_opportunityData.paymentFrequencyInDays > 0, "Invalid Payment Frequency");
         require(
-            bytes(_opportunityData.opportunityName).Length <= 50, "Length of Opportunity Name should be less than 50"
+            bytes(_opportunityData.opportunityName).length <= 50,
+            "Length of Opportunity name must be less than or equal to 50"
         );
         bytes32 id = keccak256(abi.encodePacked(_opportunityData.collateralDocument));
-        require(!s_isOpportunity[id], "SAme collateral document has been used to create opprotunity");
+        require(!s_isOpportunity[id], "Same collateral document has been used to create opprotunity");
 
         Opportunity memory _opportunity;
         _opportunity.opportunityId = id;
@@ -77,13 +78,13 @@ contract OpportunityManager is BaseUpgradeablePausable, IOpportunityManager {
         _opportunity.opportunityDescription = _opportunityData.opportunityDescription;
         _opportunity.loanType = _opportunityData.loanType;
         _opportunity.loanAmount = _opportunityData.loanAmount;
-        _opportunity.loanTenureInDays = _opportunityData.loanTermInDays;
+        _opportunity.loanTermInDays = _opportunityData.loanTermInDays;
         _opportunity.loanInterest = _opportunityData.loanInterest;
         _opportunity.paymentFrequencyInDays = _opportunityData.paymentFrequencyInDays;
         _opportunity.collateralDocument = _opportunityData.collateralDocument;
-        _opportunity.capitalLoss = _opportunityData.capitalLoss;
-        _opportunity.loanStartTime = block.timestamp;
-        s_writeOffDaysOf = reignConfig.getWriteOffDays();
+        _opportunity.InvestmentLoss = _opportunityData.InvestmentLoss;
+        _opportunity.createdAt = block.timestamp;
+        writeOffDaysOfLoan[id] = reignConfig.getWriteOffDays();
 
         s_opportunityToId[id] = _opportunity;
         s_opportunityOfBorrower[_opportunityData.borrower].push(id);
@@ -98,7 +99,7 @@ contract OpportunityManager is BaseUpgradeablePausable, IOpportunityManager {
         nonReentrant
         whenNotPaused
     {
-        require(_underwiter != 0, "Invalid address");
+        require(_underwiter != address(0), "Invalid address");
         require(s_isOpportunity[_opportunityId] == true, "Opportunity doesn't exist");
         require(
             s_opportunityToId[_opportunityId].opportunityStatus == OpportunityStatus.UnderReview,
@@ -261,7 +262,7 @@ contract OpportunityManager is BaseUpgradeablePausable, IOpportunityManager {
         IOpportunityPool(_pool).writeOffOpportunity();
     }
 
-    function isWriteOff(bytes32 _opportunityId) external view override returns (bool) {
+    function isWrittenOff(bytes32 _opportunityId) external view override returns (bool) {
         require(s_isOpportunity[_opportunityId] == true, "Opportunity doesn't exist");
         return uint8(s_opportunityToId[_opportunityId].opportunityStatus) == uint8(OpportunityStatus.WriteOff);
     }
