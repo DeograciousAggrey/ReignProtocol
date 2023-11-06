@@ -1,0 +1,90 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IInvestor",
+  "sourceName": "contracts/interfaces/IInvestor.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_investor",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "addOpportunity",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_investor",
+          "type": "address"
+        }
+      ],
+      "name": "getOpportunityOfInvestor",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_investor",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isExistInInvestor",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_investor",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "removeOpportunity",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

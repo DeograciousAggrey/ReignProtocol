@@ -1,0 +1,194 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar {
+	display: none;
+}
+
+.css-fix {
+	white-space: pre-wrap;
+}
+.background {
+	min-height: 100vh;
+	background-color: white;
+}
+
+.dark.background {
+	background-color: black;
+}
+
+.button-gradient {
+	background-image: linear-gradient(81.75deg, #4b74ff 0%, #9281ff 100%);
+}
+
+.dark .active {
+	color: #9281ff;
+	background-color: #3a3c43;
+	/* border-radius: 0.8em; */
+}
+
+.active {
+	background-color: #9281ff;
+	/* border-radius: 0.8em; */
+	color: #fff;
+}
+
+.dark .active > span > svg > path {
+	fill: #9281ff;
+}
+
+.active > span > svg > path {
+	fill: #fff;
+}
+
+.transaction-button > button {
+	padding-block: 0.2em;
+	padding-inline: 0.5em;
+	border-radius: 1.8em;
+	font-weight: 600;
+	color: black;
+}
+
+.text-gradient {
+	color: transparent;
+	background-clip: text;
+	background-image: linear-gradient(90deg, #51b960, #83dc90);
+}
+
+.card-gradient {
+	background-image: none;
+	background-color: #e7eaee;
+	box-shadow: none;
+}
+
+.dark .card-gradient {
+	box-shadow: 2.96797px 2.96797px 7.41993px -23.7438px rgba(0, 0, 0, 0.1);
+	background-image: linear-gradient(to bottom right, #282828, #00000028);
+	background-color: transparent;
+}
+
+.my-gradient {
+	background-image: linear-gradient(
+		302.47deg,
+		rgba(255, 255, 255, 0.8) 2.27%,
+		rgba(168, 154, 255, 0.260833) 98.52%
+	);
+	box-shadow: inset -1px -1px 1px rgba(185, 185, 185, 0.1);
+}
+
+.dark .my-gradient {
+	background-image: linear-gradient(
+		302.85deg,
+		rgba(168, 154, 255, 0) -1.23%,
+		rgba(168, 154, 255, 0.260833) 99.99%,
+		rgba(168, 154, 255, 0.8) 100%
+	);
+	box-shadow: 1px 1px 1px rgba(185, 185, 185, 0.1);
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type="number"] {
+	-moz-appearance: textfield;
+}
+
+.approved-btn {
+	background-image: linear-gradient(
+		97.78deg,
+		#51b960 7.43%,
+		#51b960 7.43%,
+		#51b960 7.43%,
+		#83dc90 90.63%
+	);
+}
+
+.rejected-btn {
+	background-image: linear-gradient(97.67deg, #e73838 1.07%, #ffbaba 100%);
+}
+
+.unsured-btn {
+	background-image: linear-gradient(
+		276.08deg,
+		rgba(255, 255, 255, 0.04) 2.02%,
+		rgba(255, 255, 255, 0.4) 2.03%,
+		#ffffff 99.33%
+	);
+}
+
+.css-1hb7zxy-IndicatorsContainer {
+	display: none !important;
+}
+
+.font-semibold {
+	font-weight: 400;
+}
+
+@media (min-width: 768px) {
+	.dark .landing-backgroundimage {
+		background-image: url("./assets/Dark_gradient.svg");
+		background-repeat: no-repeat;
+		background-position: 60% 45%;
+		background-size: 95%;
+	}
+
+	.landing-backgroundimage {
+		background-image: url("./assets/White_gradient.svg");
+		background-repeat: no-repeat;
+		background-position: 60% 45%;
+		background-size: 95%;
+	}
+}
+
+.themetoggle > svg > path {
+	fill: black;
+}
+
+.themetoggle-box {
+	box-shadow: 0px 0.5px 10px #9281ff;
+}
+
+.dark .themetoggle-box {
+	box-shadow: 0px 0.5px 10px rgba(255, 255, 255, 0.7);
+}
+
+.dark .themetoggle > svg > path {
+	fill: white;
+}
+
+.dark .CreateProfileIcon > svg > path {
+	fill: #fff;
+}
+
+.CreateProfileIcon > svg > path {
+	fill: black;
+}
+
+ /* For Firefox */
+ progress::-moz-progress-bar {
+	background: rgb(37 99 235);
+	border-radius: 0.5em;
+}
+
+/* For Chrome or Safari */
+progress::-webkit-progress-value {
+	background: rgb(37 99 235);
+	border-radius: 0.5em;
+}
+
+
+progress::-webkit-progress-bar {
+	border-radius: 0.5em;
+	background-color: rgb(243 244 246);
+}
+
+
+.dark progress::-webkit-progress-bar {
+	background-color: rgb(107 114 128);
+}

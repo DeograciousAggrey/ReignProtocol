@@ -1,0 +1,16 @@
+html {
+	font-size: 100%;
+	box-sizing: border-box;
+}
+
+*,
+*::after,
+*::before {
+	box-sizing: border-box;
+	padding: 0px;
+	margin: 0px;
+}
+
+body {
+	line-height: 1.3rem;
+}
