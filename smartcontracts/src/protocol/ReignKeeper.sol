@@ -39,7 +39,7 @@ contract ReignKeeper is BaseUpgradeablePausable, KeeperCompatibleInterface, IRei
 
         for (uint256 i = 0; i < s_drawdownOpportunities.length; i++) {
             uint256 dueTime = IOpportunityPool(opportunityManager.getOpportunityPoolAddress(s_drawdownOpportunities[i]))
-                .nextPaymentDue();
+                .nextRepaymentTime();
             if (dueTime < block.timestamp) {
                 uint256 opportunityThreshold = opportunityManager.writeOffDaysOfLoan(s_drawdownOpportunities[i]) * 86400;
                 uint256 timeSinceLastPayment = block.timestamp - dueTime;
@@ -56,7 +56,7 @@ contract ReignKeeper is BaseUpgradeablePausable, KeeperCompatibleInterface, IRei
         s_stopKeeper = true;
         for (uint256 i = 0; i < s_drawdownOpportunities.length; i++) {
             uint256 dueTime = IOpportunityPool(opportunityManager.getOpportunityPoolAddress(s_drawdownOpportunities[i]))
-                .nextPaymentDue();
+                .nextRepaymentTime();
             if (dueTime < block.timestamp) {
                 uint256 opportunityThreshold = opportunityManager.writeOffDaysOfLoan(s_drawdownOpportunities[i]) * 86400;
                 uint256 timeSinceLastPayment = block.timestamp - dueTime;

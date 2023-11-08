@@ -125,7 +125,7 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         //Check whether opportunity is already funded by senior pool
         address poolAddress = opportunityManager.getOpportunityPoolAddress(opportunityId);
         IOpportunityPool opportunitypool = IOpportunityPool(poolAddress);
-        uint256 amount = opportunitypool.getSeniorPoolTotalDepositable();
+        uint256 amount = opportunitypool.getSeniorTotalDepositable();
 
         //Check whether senior pool has enough balance to fund the opportunity
         require(s_seniorPoolBalance >= amount, "SeniorPool: insufficient senior pool balance");
