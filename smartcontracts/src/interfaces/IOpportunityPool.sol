@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity ^0.8.20;
 
 import {ReignConfig} from "../protocol/ReignConfig.sol";
 /**
@@ -10,14 +10,15 @@ import {ReignConfig} from "../protocol/ReignConfig.sol";
  */
 
 interface IOpportunityPool {
-    enum SubPoolType {
-        Senior,
-        Junior
+    enum SubPool {
+        JuniorSubpool,
+        SeniorSubpool
     }
 
     struct SubPoolDetails {
         uint256 subPoolId;
         uint256 totalDepositable;
+        uint256 depositedAmount;
         bool isPoolLocked;
         uint256 fundsLockedTill;
         uint256 yieldGenerated;
@@ -50,9 +51,9 @@ interface IOpportunityPool {
 
     function getOverDuePercentage() external view returns (uint256, uint256);
 
-    function nextPaymentDue() external view returns (uint256);
+    function nextRepaymentTime() external view returns (uint256);
 
-    function getSeniorPoolTotalDepositable() external view returns (uint256);
+    function getSeniorTotalDepositable() external view returns (uint256);
 
     function getSeniorProfit() external view returns (uint256);
 

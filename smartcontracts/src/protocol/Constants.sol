@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity ^0.8.20;
 
 library Constants {
     uint256 public constant ONE_YEAR_IN_DAYS = 365;

@@ -1,11 +1,12 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.4;
+pragma solidity ^0.8.20;
 
 import {BaseUpgradeablePausable} from "./BaseUpgradeablePausable.sol";
 import {ConfigHelper} from "./ConfigHelper.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {MultiSign} from "./MultiSign.sol";
+import {multiSigWallet} from "./MultiSign.sol";
+import {ReignConfig} from "./ReignConfig.sol";
 
 contract ReignTreasury is BaseUpgradeablePausable {
     using SafeERC20 for IERC20;

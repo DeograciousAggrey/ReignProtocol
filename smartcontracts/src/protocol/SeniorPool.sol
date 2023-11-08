@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity ^0.8.20;
 
 import {BaseUpgradeablePausable} from "./BaseUpgradeablePausable.sol";
 import {ISeniorPool} from "../interfaces/ISeniorPool.sol";
@@ -13,8 +13,9 @@ import {SafeMathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/mat
 import {ReignConfig} from "./ReignConfig.sol";
 import {IOpportunityManager} from "../interfaces/IOpportunityManager.sol";
 import {IOpportunityPool} from "../interfaces/IOpportunityPool.sol";
-import {ConfigOptions} from "../libraries/ConfigOptions.sol";
-import {Constants} from "../Constants.sol";
+import {ConfigOptions} from "./ConfigOptions.sol";
+import {Constants} from "./Constants.sol";
+import {ConfigHelper} from "./ConfigHelper.sol";
 
 contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
     using SafeMathUpgradeable for uint256;
@@ -79,12 +80,12 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         address owner = reignConfig.reignAdminAddress();
         require(owner != address(0), "SeniorPool: reignAdminAddress cannot be zero address");
 
-        opportunityManager = IOpportunityManager(reignConfig.opportunityManagerAddress());
+        opportunityManager = IOpportunityManager(reignConfig.getOpportunityOrigination());
 
         _BaseUpgradeablePausable_init(owner);
-        s_usdcToken = IERC20(reignConfig.usdcTokenAddress());
-        s_reignToken = IReignCoin(reignConfig.reignTokenAddress());
-        s_investmentLockInMonths = reignConfig.getSeniorPoolInvestmentLockInMonths();
+        s_usdcToken = IERC20(reignConfig.usdcAddress());
+        s_reignToken = IReignCoin(reignConfig.reignCoinAddress());
+        s_investmentLockInMonths = reignConfig.getSeniorPoolLockinMonths();
         s_sharePrice = 0;
     }
 
@@ -144,10 +145,10 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
 
         //Calculate share price
         uint256 totalprofit;
-        if (_isWriteOff == true) totalprofit = _amount;
+        if (_isWriteOff == true) totalprofit = amount;
         else totalprofit = opportunitypool.getSeniorProfit();
-        uint256 totalShares = s_reignToken.totalSupply();
-        uint256 delta = totalprofit.mul(lpMantissa).div(totalShares);
+        uint256 _totalShares = s_reignToken.totalShares();
+        uint256 delta = totalprofit.mul(lpMantissa()).div(_totalShares);
         s_sharePrice = s_sharePrice.add(delta);
 
         if (_isWriteOff == false) {
@@ -203,7 +204,7 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
     function sanitizeInputDecimalDiscrepancies(uint256 inputAmt, uint256 withdrawableAmt)
         internal
         pure
-        returns (uint256)
+        returns (uint256 amount)
     {
         if (inputAmt > withdrawableAmt && (inputAmt - withdrawableAmt) < lpMantissa()) {
             amount = withdrawableAmt;
@@ -240,7 +241,7 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
         }
 
         //Calculate total USDC based on share price
-        uint256 usdcAmount = getUSDCFromShares(amount);
+        uint256 usdcAmount = getUSDCAmountFromShares(amount);
 
         //Update senior pool balance
         s_seniorPoolBalance = s_seniorPoolBalance.sub(usdcAmount);
@@ -267,10 +268,10 @@ contract SeniorPool is BaseUpgradeablePausable, ISeniorPool {
 
     function totalShares() internal view returns (uint256) {
         require(address(s_reignToken) != address(0), "SeniorPool: reignToken address cannot be zero address");
-        return s_reignToken.totalSupply();
+        return s_reignToken.totalShares();
     }
 
-    function lpMantissa() internal view returns (uint256) {
+    function lpMantissa() internal pure returns (uint256) {
         return uint256(10) ** uint256(6);
     }
 

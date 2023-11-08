@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.4;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
@@ -69,8 +69,8 @@ contract CollateralToken is
         _setTokenURI(tokenId, uri);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal whenNotPaused {
-        super._beforeTokenTransfer(from, to, tokenId);
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256) internal override whenNotPaused {
+        super._beforeTokenTransfer(from, to, tokenId, 1);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(Constants.getUpgraderRole()) {}
