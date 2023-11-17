@@ -30,9 +30,9 @@ module.exports = {
         
 		},
 	},
-	// paths: {
-	// 	artifacts: "../../frontend/src/artifacts",
-	// },
+	paths: {
+		artifacts: "../frontend/src/artifacts",
+	},
 	networks: {
 		polygon_mumbai: {
 			url: "https://rpc-mumbai.maticvigil.com/",
