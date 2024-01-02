@@ -5,6 +5,7 @@ pragma solidity ^0.8.20;
 import {BaseUpgradeablePausable} from "./BaseUpgradeablePausable.sol";
 import {ReignConfig} from "./ReignConfig.sol";
 import {ConfigHelper} from "./ConfigHelper.sol";
+// Everything as it should be
 
 contract Borrower is BaseUpgradeablePausable {
     ReignConfig private reignConfig;
